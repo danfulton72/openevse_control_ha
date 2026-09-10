@@ -50,7 +50,8 @@ jobs:
         uses: hacs/action@main
         with:
           category: integration
-          # The GitHub App connection used to maintain this repository cannot edit
-          # repository-level metadata. Keep every code/package check enabled; the
-          # only ignored check is GitHub's repository description field.
-          ignore: description
+          # HACS reads repository-level metadata from the default branch. During
+          # this initial PR, LICENSE is not on main yet, and this GitHub App cannot
+          # edit the repository description. The merged repository does contain
+          # LICENSE; only the description remains an external repository setting.
+          ignore: description license
