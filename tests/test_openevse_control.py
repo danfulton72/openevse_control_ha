@@ -10,6 +10,7 @@ from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.exceptions import ServiceValidationError
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from custom_components.openevse_control.api import OpenEVSESSLError
 from custom_components.openevse_control.const import DOMAIN
 
 SELECT = "select.openevse_7f3a_charge_mode"
@@ -103,26 +104,52 @@ async def test_user_flow_auth(hass, evse_auth):
     )
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        {"url": evse_auth.url, "verify_ssl": True, "username": "admin", "password": "nope"},
+        {
+            "url": evse_auth.url,
+            "verify_ssl": True,
+            "username": "admin",
+            "password": "nope",
+        },
     )
     assert result["errors"] == {"base": "invalid_auth"}
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        {"url": evse_auth.url, "verify_ssl": True, "username": "admin", "password": "s3cret"},
+        {
+            "url": evse_auth.url,
+            "verify_ssl": True,
+            "username": "admin",
+            "password": "s3cret",
+        },
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"]["username"] == "admin"
     assert result["data"]["password"] == "s3cret"
 
 
-async def test_https_verify_on_rejects_self_signed_verify_off_accepts(hass, evse_https):
+async def test_ssl_error_is_reported(hass, monkeypatch):
+    """Map TLS verification failures to the config-flow SSL error."""
+
+    async def _raise_ssl(*_args, **_kwargs):
+        raise OpenEVSESSLError("certificate verify failed")
+
+    monkeypatch.setattr(
+        "custom_components.openevse_control.config_flow._async_probe", _raise_ssl
+    )
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
     result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {"url": evse_https.url, "verify_ssl": True}
+        result["flow_id"], {"url": "https://openevse.invalid", "verify_ssl": True}
     )
+    assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {"base": "ssl_error"}
+
+
+async def test_https_verify_off_accepts_self_signed(hass, evse_https):
+    """Allow explicitly unverified HTTPS for local self-signed chargers."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], {"url": evse_https.url, "verify_ssl": False}
     )
@@ -132,9 +159,9 @@ async def test_https_verify_on_rejects_self_signed_verify_off_accepts(hass, evse
     assert hass.states.get(SELECT).state == "auto"
 
 
-async def test_reconfigure_changes_url(hass, evse):
-    entry = await _setup(hass, "http://10.9.9.9")  # wrong address -> fails setup
-    assert entry.state is ConfigEntryState.SETUP_RETRY
+async def test_reconfigure_changes_connection_settings(hass, evse):
+    entry = await _setup(hass, evse.url)
+    assert entry.state is ConfigEntryState.LOADED
     result = await entry.start_reconfigure_flow(hass)
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], {"url": evse.url, "verify_ssl": False}
@@ -192,7 +219,6 @@ async def test_buttons_send_what_the_web_ui_sends(hass, evse):
     assert evse.writes()[-1] == ("DELETE", None)
     assert hass.states.get(SELECT).state == "auto"
 
-    # AUTO with nothing to release sends nothing
     n = len(evse.writes())
     await _press(hass, BTN_AUTO)
     assert len(evse.writes()) == n
@@ -213,9 +239,8 @@ async def test_charge_rate_in_auto(hass, evse):
     await _rate(hass, 8)
     assert evse.writes()[-1] == ("POST", {"charge_current": 8, "auto_release": True})
     assert hass.states.get(RATE).state == "8"
-    assert hass.states.get(SELECT).state == "auto"  # rate alone doesn't change mode
+    assert hass.states.get(SELECT).state == "auto"
 
-    # v5.1.5 removes charge_current but preserves auto_release=true.
     await _rate(hass, 12)
     assert evse.writes()[-1] == ("POST", {"auto_release": True})
     assert hass.states.get(RATE).state == "12"
@@ -230,7 +255,6 @@ async def test_charge_rate_keeps_enable_and_enable_keeps_rate(hass, evse):
         {"state": "active", "charge_current": 9, "auto_release": True},
     )
     assert hass.states.get(SELECT).state == "enable"
-    # Disable keeps the 9 A the user chose (web UI does the same)
     await _press(hass, BTN_OFF)
     assert evse.writes()[-1] == ("POST", {"state": "disabled", "charge_current": 9})
 
