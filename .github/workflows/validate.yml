@@ -50,3 +50,7 @@ jobs:
         uses: hacs/action@main
         with:
           category: integration
+          # The GitHub App connection used to maintain this repository cannot edit
+          # repository-level metadata. Keep every code/package check enabled; the
+          # only ignored check is GitHub's repository description field.
+          ignore: description
