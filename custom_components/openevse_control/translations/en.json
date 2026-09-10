@@ -37,7 +37,7 @@
         },
         "data_description": {
           "password": "Use the password configured for the OpenEVSE web interface, if authentication is enabled.",
-          "url": "For example `http://192.168.1.50` or `https://openevse.local`.",
+          "url": "Enter the network address or host name of the OpenEVSE WiFi module.",
           "username": "Use the username configured for the OpenEVSE web interface, if authentication is enabled.",
           "verify_ssl": "Only used for HTTPS URLs. Turn this off if the charger uses a self-signed certificate."
         },
@@ -53,7 +53,7 @@
         },
         "data_description": {
           "password": "Use the password configured for the OpenEVSE web interface, if authentication is enabled.",
-          "url": "For example `http://192.168.1.50` or `https://openevse.local`. HTTP is assumed if the scheme is omitted.",
+          "url": "Enter the charger network address or host name. HTTP is assumed when no scheme is supplied.",
           "username": "Use the username configured for the OpenEVSE web interface, if authentication is enabled.",
           "verify_ssl": "Only used for HTTPS URLs. Turn this off if the charger uses a self-signed certificate."
         },
