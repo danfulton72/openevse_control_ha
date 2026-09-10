@@ -1,0 +1,13 @@
+{
+  "codeowners": [
+    "@danfulton72"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/danfulton72/openevse_control_ha#readme",
+  "domain": "openevse_control",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/danfulton72/openevse_control_ha/issues",
+  "name": "OpenEVSE Control",
+  "version": "1.1.0"
+}
