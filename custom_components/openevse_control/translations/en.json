@@ -37,9 +37,9 @@
         },
         "data_description": {
           "password": "Use the password configured for the OpenEVSE web interface, if authentication is enabled.",
-          "url": "For example `http://192.168.1.50` or `https://openevse.local`.",
+          "url": "Enter the charger's HTTP or HTTPS address.",
           "username": "Use the username configured for the OpenEVSE web interface, if authentication is enabled.",
-          "verify_ssl": "Only used for HTTPS URLs. Turn this off if the charger uses a self-signed certificate."
+          "verify_ssl": "Only used for HTTPS addresses. Turn this off if the charger uses a self-signed certificate."
         },
         "description": "Change how Home Assistant connects to this charger.",
         "title": "Reconfigure OpenEVSE"
@@ -53,9 +53,9 @@
         },
         "data_description": {
           "password": "Use the password configured for the OpenEVSE web interface, if authentication is enabled.",
-          "url": "For example `http://192.168.1.50` or `https://openevse.local`. HTTP is assumed if the scheme is omitted.",
+          "url": "Enter the charger's HTTP or HTTPS address. HTTP is assumed if the scheme is omitted.",
           "username": "Use the username configured for the OpenEVSE web interface, if authentication is enabled.",
-          "verify_ssl": "Only used for HTTPS URLs. Turn this off if the charger uses a self-signed certificate."
+          "verify_ssl": "Only used for HTTPS addresses. Turn this off if the charger uses a self-signed certificate."
         },
         "description": "Connect to an OpenEVSE WiFi module. Both the V4 HTTP/RAPI interface and the modern override/claims API are supported.",
         "title": "Connect to OpenEVSE"
