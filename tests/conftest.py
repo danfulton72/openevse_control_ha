@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
+import asyncio
 import ssl
-import subprocess
 
+import pytest
 from aiohttp import web
 from aiohttp.test_utils import unused_port
-import pytest
 
 from .fake_openevse import FakeOpenEVSE
 
@@ -62,7 +62,7 @@ async def evse_v4(hass):
 
 @pytest.fixture
 async def evse_auth(hass):
-    """Fake charger with a password set (blank user name on the charger)."""
+    """Fake charger with configured web credentials."""
     fake = FakeOpenEVSE(password="s3cret", username="admin")
     runner = await _serve(fake)
     yield fake
@@ -73,11 +73,26 @@ async def evse_auth(hass):
 async def evse_https(hass, tmp_path):
     """HTTPS fake charger with a self-signed certificate."""
     key, cert = tmp_path / "key.pem", tmp_path / "cert.pem"
-    subprocess.run(
-        ["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1",
-         "-subj", "/CN=openevse.local", "-keyout", str(key), "-out", str(cert)],
-        check=True, capture_output=True,
+    process = await asyncio.create_subprocess_exec(
+        "openssl",
+        "req",
+        "-x509",
+        "-newkey",
+        "rsa:2048",
+        "-nodes",
+        "-days",
+        "1",
+        "-subj",
+        "/CN=openevse.local",
+        "-keyout",
+        str(key),
+        "-out",
+        str(cert),
+        stdout=asyncio.subprocess.DEVNULL,
+        stderr=asyncio.subprocess.DEVNULL,
     )
+    if await process.wait() != 0:
+        raise RuntimeError("failed to generate test certificate")
     ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     ctx.load_cert_chain(cert, key)
     fake = FakeOpenEVSE()
