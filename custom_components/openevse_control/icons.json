@@ -1,0 +1,30 @@
+{
+  "entity": {
+    "button": {
+      "auto_charge": {
+        "default": "mdi:robot"
+      },
+      "disable_charge": {
+        "default": "mdi:cancel"
+      },
+      "enable_charge": {
+        "default": "mdi:lightning-bolt"
+      }
+    },
+    "number": {
+      "charge_rate": {
+        "default": "mdi:speedometer"
+      }
+    },
+    "select": {
+      "charge_mode": {
+        "default": "mdi:ev-station",
+        "state": {
+          "auto": "mdi:robot",
+          "disable": "mdi:cancel",
+          "enable": "mdi:lightning-bolt"
+        }
+      }
+    }
+  }
+}
