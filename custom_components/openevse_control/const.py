@@ -12,6 +12,7 @@ DEFAULT_SCAN_INTERVAL: Final = 10
 MIN_SCAN_INTERVAL: Final = 5
 MAX_SCAN_INTERVAL: Final = 300
 DEFAULT_AUTO_RELEASE: Final = True
+DEFAULT_USERNAME: Final = "openevseadmin"
 
 API_MODERN: Final = "modern"
 API_LEGACY: Final = "v4_rapi"
@@ -42,6 +43,8 @@ CLIENT_NAMES: Final[dict[int, str]] = {
     65546: "rfid",
     65547: "mqtt",
     65548: "shaper",
+    65549: "temperature_throttle",
+    65550: "load_sharing",
 }
 PRIORITY_MANUAL: Final = 1000
 
