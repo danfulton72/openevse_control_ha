@@ -65,9 +65,13 @@ class OpenEVSEClient:
         """Initialize the client."""
         self._session = session
         self._base = normalize_url(url)
-        self._auth: aiohttp.BasicAuth | None = None
+        self._headers: dict[str, str] | None = None
         if username is not None or password is not None:
-            self._auth = aiohttp.BasicAuth(username or "", password or "")
+            self._headers = {
+                "Authorization": aiohttp.encode_basic_auth(
+                    username or "", password or ""
+                )
+            }
 
     @property
     def url(self) -> str:
@@ -92,7 +96,7 @@ class OpenEVSEClient:
                 url,
                 json=body,
                 params=params,
-                auth=self._auth,
+                headers=self._headers,
                 timeout=REQUEST_TIMEOUT,
             ) as resp:
                 text = await resp.text()
