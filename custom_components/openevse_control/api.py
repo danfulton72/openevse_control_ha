@@ -9,6 +9,8 @@ from typing import Any, Final
 import aiohttp
 from yarl import URL
 
+from .const import DEFAULT_USERNAME
+
 _LOGGER = logging.getLogger(__name__)
 
 REQUEST_TIMEOUT: Final = aiohttp.ClientTimeout(total=15)
@@ -67,7 +69,8 @@ class OpenEVSEClient:
         self._base = normalize_url(url)
         self._auth: aiohttp.BasicAuth | None = None
         if username is not None or password is not None:
-            self._auth = aiohttp.BasicAuth(username or "", password or "")
+            effective_username = username or (DEFAULT_USERNAME if password else "")
+            self._auth = aiohttp.BasicAuth(effective_username, password or "")
 
     @property
     def url(self) -> str:
