@@ -1,0 +1,75 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "custom_components/openevse_control/**"
+      - "hacs.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml
+
+  release:
+    name: Publish matching GitHub release
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read and validate manifest version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          manifest="custom_components/openevse_control/manifest.json"
+          version="$(jq -er '.version' "$manifest")"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid manifest version: $version" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure the version has not already been released from another commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git rev-parse --verify --quiet "refs/tags/$VERSION" >/dev/null; then
+            tag_sha="$(git rev-list -n 1 "$VERSION")"
+            if [[ "$tag_sha" != "$GITHUB_SHA" ]]; then
+              echo "Release/tag $VERSION already points to $tag_sha." >&2
+              echo "Bump manifest.json version before merging another integration change." >&2
+              exit 1
+            fi
+          fi
+
+      - name: Create release whose number matches manifest.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            echo "Release $VERSION already exists for this commit; nothing to do."
+            exit 0
+          fi
+          gh release create "$VERSION" \
+            --target "$GITHUB_SHA" \
+            --title "$VERSION" \
+            --generate-notes

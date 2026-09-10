@@ -1,0 +1,138 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "This charger is already configured.",
+      "reauth_successful": "Re-authentication was successful.",
+      "reconfigure_successful": "Reconfiguration was successful.",
+      "wrong_device": "That address belongs to a different charger than the one configured here."
+    },
+    "error": {
+      "cannot_connect": "Could not connect. Check the URL and that the charger is reachable from Home Assistant.",
+      "invalid_auth": "The charger rejected the username or password.",
+      "invalid_url": "Enter a valid HTTP or HTTPS address.",
+      "not_openevse": "The address does not expose a supported OpenEVSE control API.",
+      "rate_limited": "The charger has temporarily locked logins after too many failed attempts. Try again later.",
+      "ssl_error": "SSL/TLS error. If the charger uses a self-signed certificate, turn off certificate verification or use HTTP.",
+      "unknown": "Unexpected error. See the Home Assistant log for details."
+    },
+    "step": {
+      "reauth_confirm": {
+        "data": {
+          "password": "Password",
+          "username": "Username"
+        },
+        "data_description": {
+          "password": "Enter the current OpenEVSE web-interface password.",
+          "username": "Use the username configured for the OpenEVSE web interface."
+        },
+        "description": "The charger at {url} rejected the stored credentials. Enter the current credentials.",
+        "title": "Re-authenticate OpenEVSE"
+      },
+      "reconfigure": {
+        "data": {
+          "password": "Password",
+          "url": "URL",
+          "username": "Username",
+          "verify_ssl": "Verify SSL certificate"
+        },
+        "data_description": {
+          "password": "Use the password configured for the OpenEVSE web interface, if authentication is enabled.",
+          "url": "Enter the network address or host name of the OpenEVSE WiFi module.",
+          "username": "Use the username configured for the OpenEVSE web interface, if authentication is enabled.",
+          "verify_ssl": "Only used for HTTPS URLs. Turn this off if the charger uses a self-signed certificate."
+        },
+        "description": "Change how Home Assistant connects to this charger.",
+        "title": "Reconfigure OpenEVSE"
+      },
+      "user": {
+        "data": {
+          "password": "Password",
+          "url": "URL",
+          "username": "Username",
+          "verify_ssl": "Verify SSL certificate"
+        },
+        "data_description": {
+          "password": "Use the password configured for the OpenEVSE web interface, if authentication is enabled.",
+          "url": "Enter the charger network address or host name. HTTP is assumed when no scheme is supplied.",
+          "username": "Use the username configured for the OpenEVSE web interface, if authentication is enabled.",
+          "verify_ssl": "Only used for HTTPS URLs. Turn this off if the charger uses a self-signed certificate."
+        },
+        "description": "Connect to an OpenEVSE WiFi module. Both the V4 HTTP/RAPI interface and the modern override/claims API are supported.",
+        "title": "Connect to OpenEVSE"
+      }
+    }
+  },
+  "entity": {
+    "button": {
+      "auto_charge": {
+        "name": "Auto charge"
+      },
+      "disable_charge": {
+        "name": "Disable charge"
+      },
+      "enable_charge": {
+        "name": "Enable charge"
+      }
+    },
+    "number": {
+      "charge_rate": {
+        "name": "Charge rate",
+        "state_attributes": {
+          "controlled_by": {
+            "name": "Controlled by"
+          }
+        }
+      }
+    },
+    "select": {
+      "charge_mode": {
+        "name": "Charge mode",
+        "state": {
+          "auto": "Auto",
+          "disable": "Disable charge",
+          "enable": "Enable charge"
+        },
+        "state_attributes": {
+          "controlled_by": {
+            "name": "Controlled by"
+          }
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "command_failed": {
+      "message": "OpenEVSE did not accept the command: {error}"
+    },
+    "invalid_auth": {
+      "message": "The charger rejected the stored credentials. Re-authenticate the integration."
+    },
+    "invalid_mode": {
+      "message": "Unknown charge mode `{mode}`. Use one of: {modes}."
+    },
+    "mode_locked": {
+      "message": "The charge mode is currently controlled by {client} and cannot be changed manually."
+    },
+    "rate_locked": {
+      "message": "The charge rate is currently controlled by {client}, which takes priority over manual changes."
+    },
+    "rate_locked_eco": {
+      "message": "The charge rate cannot be changed while Eco (solar divert) mode is active."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "auto_release": "Auto-release charge-current override",
+          "scan_interval": "Polling interval"
+        },
+        "data_description": {
+          "auto_release": "For modern firmware, set `auto_release` on manual current changes to match the OpenEVSE web interface.",
+          "scan_interval": "How often to check charger status. Versioned modern resources and V4 current limits are cached."
+        },
+        "title": "OpenEVSE Control options"
+      }
+    }
+  }
+}
